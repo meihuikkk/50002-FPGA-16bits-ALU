@@ -21,152 +21,474 @@ module au_top_0 (
   
   reg rst;
   
-  reg [15:0] M_store1_d, M_store1_q = 1'h0;
-  
-  reg [15:0] M_store2_d, M_store2_q = 1'h0;
-  
-  wire [1-1:0] M_slowclock_value;
-  counter_1 slowclock (
-    .clk(clk),
-    .rst(rst),
-    .value(M_slowclock_value)
-  );
-  
-  wire [16-1:0] M_autotester_out;
-  autotest_2 autotester (
-    .clk(M_slowclock_value),
-    .rst(rst),
-    .out(M_autotester_out)
-  );
-  
-  wire [16-1:0] M_alu_test_out;
-  wire [3-1:0] M_alu_test_zvn;
-  reg [16-1:0] M_alu_test_a;
-  reg [16-1:0] M_alu_test_b;
-  reg [6-1:0] M_alu_test_alusignal;
-  alu_3 alu_test (
-    .a(M_alu_test_a),
-    .b(M_alu_test_b),
-    .alusignal(M_alu_test_alusignal),
-    .out(M_alu_test_out),
-    .zvn(M_alu_test_zvn)
+  wire [16-1:0] M_alu_out;
+  wire [3-1:0] M_alu_zvn;
+  reg [16-1:0] M_alu_a;
+  reg [16-1:0] M_alu_b;
+  reg [6-1:0] M_alu_alufn;
+  alu_1 alu (
+    .a(M_alu_a),
+    .b(M_alu_b),
+    .alufn(M_alu_alufn),
+    .out(M_alu_out),
+    .zvn(M_alu_zvn)
   );
   
   wire [1-1:0] M_reset_cond_out;
   reg [1-1:0] M_reset_cond_in;
-  reset_conditioner_4 reset_cond (
+  reset_conditioner_2 reset_cond (
     .clk(clk),
     .in(M_reset_cond_in),
     .out(M_reset_cond_out)
   );
-  localparam IDLE_state = 5'd0;
-  localparam STORE1_state = 5'd1;
-  localparam STORE2_state = 5'd2;
+  localparam REST_state = 5'd0;
+  localparam INPUTA_state = 5'd1;
+  localparam INPUTB_state = 5'd2;
   localparam CALCULATE_state = 5'd3;
   localparam AUTO_state = 5'd4;
   localparam TESTADDER1_state = 5'd5;
   localparam TESTADDER2_state = 5'd6;
   localparam TESTADDER3_state = 5'd7;
-  localparam TESTBOOL1_state = 5'd8;
-  localparam TESTBOOL2_state = 5'd9;
-  localparam TESTBOOL3_state = 5'd10;
-  localparam TESTSHIFT1_state = 5'd11;
-  localparam TESTSHIFT2_state = 5'd12;
-  localparam TESTSHIFT3_state = 5'd13;
-  localparam TESTCMP1_state = 5'd14;
-  localparam TESTCMP2_state = 5'd15;
-  localparam TESTCMP3_state = 5'd16;
-  localparam PASS_state = 5'd17;
-  localparam FAIL_state = 5'd18;
+  localparam TESTADDER4_state = 5'd8;
+  localparam TESTBOOL1_state = 5'd9;
+  localparam TESTBOOL2_state = 5'd10;
+  localparam TESTBOOL3_state = 5'd11;
+  localparam TESTBOOL4_state = 5'd12;
+  localparam TESTBOOL5_state = 5'd13;
+  localparam TESTBOOL6_state = 5'd14;
+  localparam TESTSHIFT1_state = 5'd15;
+  localparam TESTSHIFT2_state = 5'd16;
+  localparam TESTSHIFT3_state = 5'd17;
+  localparam TESTCMP1_state = 5'd18;
+  localparam TESTCMP2_state = 5'd19;
+  localparam TESTCMP3_state = 5'd20;
+  localparam PASS_state = 5'd21;
+  localparam FAIL_state = 5'd22;
   
-  reg [4:0] M_state_d, M_state_q = IDLE_state;
+  reg [4:0] M_state_d, M_state_q = REST_state;
+  reg [15:0] M_inp_a_d, M_inp_a_q = 1'h0;
+  reg [15:0] M_inp_b_d, M_inp_b_q = 1'h0;
+  wire [3-1:0] M_ctr_value;
+  counter_3 ctr (
+    .clk(clk),
+    .rst(rst),
+    .value(M_ctr_value)
+  );
+  wire [7-1:0] M_seg_seg;
+  wire [4-1:0] M_seg_sel;
+  reg [32-1:0] M_seg_values;
+  multi_seven_seg_4 seg (
+    .clk(clk),
+    .rst(rst),
+    .values(M_seg_values),
+    .seg(M_seg_seg),
+    .sel(M_seg_sel)
+  );
+  reg [26:0] M_counter_d, M_counter_q = 1'h0;
   
   always @* begin
     M_state_d = M_state_q;
-    M_store1_d = M_store1_q;
-    M_store2_d = M_store2_q;
+    M_inp_b_d = M_inp_b_q;
+    M_inp_a_d = M_inp_a_q;
+    M_counter_d = M_counter_q;
     
-    io_sel = 4'hf;
     M_reset_cond_in = ~rst_n;
     rst = M_reset_cond_out;
     usb_tx = usb_rx;
     led = 8'h00;
     io_led = 24'h000000;
-    io_seg = 8'hff;
-    io_sel = 4'hf;
-    M_alu_test_alusignal = io_dip[16+0+5-:6];
-    M_alu_test_a = 1'h0;
-    M_alu_test_b = 1'h0;
+    io_seg = ~M_seg_seg;
+    io_sel = ~M_seg_sel;
+    io_led[16+0+3-:4] = M_alu_zvn;
+    io_led[16+7+0-:1] = io_dip[16+7+0-:1];
+    M_alu_a = 1'h0;
+    M_alu_b = 1'h0;
+    M_alu_alufn = 1'h0;
+    M_seg_values = 32'h00000000;
     
     case (M_state_q)
-      IDLE_state: begin
-        if (io_button[0+0-:1]) begin
-          M_state_d = STORE1_state;
-        end
-        if (io_button[3+0-:1]) begin
-          M_state_d = AUTO_state;
+      REST_state: begin
+        M_seg_values = 32'h0d05150e;
+        if (io_button[0+0-:1] == 1'h1) begin
+          M_state_d = INPUTA_state;
         end
       end
-      STORE1_state: begin
-        io_led[8+7-:8] = io_dip[8+7-:8];
-        io_led[0+7-:8] = io_dip[0+7-:8];
-        if (io_button[1+0-:1]) begin
-          M_store1_d[8+7-:8] = io_dip[8+7-:8];
-          M_store1_d[0+7-:8] = io_dip[0+7-:8];
-          M_state_d = STORE2_state;
-        end
-        if (io_button[4+0-:1]) begin
-          M_state_d = IDLE_state;
+      INPUTA_state: begin
+        M_seg_values = 32'h150e0d11;
+        io_led[8+0+7-:8] = io_dip[8+7-:8];
+        io_led[0+0+7-:8] = io_dip[0+7-:8];
+        M_inp_a_d = {io_dip[8+0+7-:8], io_dip[0+0+7-:8]};
+        if (io_button[2+0-:1] == 1'h1) begin
+          M_state_d = INPUTB_state;
+        end else begin
+          if (io_button[3+0-:1] == 1'h1) begin
+            M_state_d = REST_state;
+          end
         end
       end
-      STORE2_state: begin
-        io_led[8+7-:8] = io_dip[8+7-:8];
-        io_led[0+7-:8] = io_dip[0+7-:8];
-        if (io_button[2+0-:1]) begin
-          M_store2_d[8+7-:8] = io_dip[8+7-:8];
-          M_store2_d[0+7-:8] = io_dip[0+7-:8];
+      INPUTB_state: begin
+        M_seg_values = 32'h150e0d12;
+        io_led[8+0+7-:8] = io_dip[8+7-:8];
+        io_led[0+0+7-:8] = io_dip[0+7-:8];
+        M_inp_b_d = {io_dip[8+0+7-:8], io_dip[0+0+7-:8]};
+        if (io_button[1+0-:1] == 1'h1) begin
           M_state_d = CALCULATE_state;
-        end
-        if (io_button[4+0-:1]) begin
-          M_state_d = IDLE_state;
+        end else begin
+          if (io_button[3+0-:1] == 1'h1) begin
+            M_state_d = REST_state;
+          end
         end
       end
       CALCULATE_state: begin
-        M_alu_test_a = M_store1_q;
-        M_alu_test_b = M_store2_q;
-        M_alu_test_alusignal = io_dip[16+0+5-:6];
-        io_led[8+7-:8] = M_alu_test_out[8+7-:8];
-        io_led[0+7-:8] = M_alu_test_out[0+7-:8];
-        io_led[16+0+0-:1] = M_alu_test_zvn[0+0-:1];
-        io_led[16+1+0-:1] = M_alu_test_zvn[1+0-:1];
-        io_led[16+2+0-:1] = M_alu_test_zvn[2+0-:1];
-        if (io_button[4+0-:1]) begin
-          M_state_d = IDLE_state;
+        M_seg_values = 32'h03010903;
+        M_alu_a = M_inp_a_q;
+        M_alu_b = M_inp_b_q;
+        M_alu_alufn = io_dip[16+0+5-:6];
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+        if (io_button[3+0-:1] == 1'h1) begin
+          M_state_d = REST_state;
         end
       end
       AUTO_state: begin
-        if (io_button[0+0-:1]) begin
-          io_led[8+7-:8] = M_autotester_out[8+7-:8];
-          io_led[0+7-:8] = M_autotester_out[0+7-:8];
+        M_seg_values = 32'h010f0e10;
+      end
+      TESTADDER1_state: begin
+        M_seg_values = 32'h01040411;
+        M_alu_a = 16'h1555;
+        M_alu_b = 16'h2aab;
+        M_alu_alufn = 6'h00;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0000;
         end
-        if (io_button[4+0-:1]) begin
-          M_state_d = IDLE_state;
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTADDER2_state: begin
+        M_seg_values = 32'h01040412;
+        M_alu_a = 16'h9545;
+        M_alu_b = 16'h1eaf;
+        M_alu_alufn = 6'h00;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0000;
         end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTADDER3_state: begin
+        M_seg_values = 32'h150f0211;
+        M_alu_a = 16'hf0e0;
+        M_alu_b = 16'h0020;
+        M_alu_alufn = 6'h01;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0000;
+        end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTADDER4_state: begin
+        M_seg_values = 32'h150f0212;
+        M_alu_a = 16'h1e7f;
+        M_alu_b = 16'h0555;
+        M_alu_alufn = 6'h01;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0000;
+        end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTBOOL1_state: begin
+        M_seg_values = 32'h010a0411;
+        M_alu_a = 16'h1555;
+        M_alu_b = 16'h2aab;
+        M_alu_alufn = 6'h28;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0000;
+        end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTBOOL2_state: begin
+        M_seg_values = 32'h010a0412;
+        M_alu_a = 16'h9545;
+        M_alu_b = 16'ha557;
+        M_alu_alufn = 6'h28;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0000;
+        end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTBOOL3_state: begin
+        M_seg_values = 32'h00100d11;
+        M_alu_a = 16'h1555;
+        M_alu_b = 16'h2aab;
+        M_alu_alufn = 6'h2e;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0000;
+        end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTBOOL4_state: begin
+        M_seg_values = 32'h00100d12;
+        M_alu_a = 16'h9545;
+        M_alu_b = 16'ha557;
+        M_alu_alufn = 6'h2e;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0000;
+        end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTBOOL5_state: begin
+        M_seg_values = 32'h07100d11;
+        M_alu_a = 16'h1555;
+        M_alu_b = 16'h2aab;
+        M_alu_alufn = 6'h26;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0000;
+        end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTBOOL6_state: begin
+        M_seg_values = 32'h07100d12;
+        M_alu_a = 16'h9545;
+        M_alu_b = 16'ha557;
+        M_alu_alufn = 6'h26;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0000;
+        end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTSHIFT1_state: begin
+        M_seg_values = 32'h15070911;
+        M_alu_a = 16'h1555;
+        M_alu_b = 16'h0002;
+        M_alu_alufn = 6'h30;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0000;
+        end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTSHIFT2_state: begin
+        M_seg_values = 32'h15070d11;
+        M_alu_a = 16'h1555;
+        M_alu_b = 16'h0000;
+        M_alu_alufn = 6'h31;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0000;
+        end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTSHIFT3_state: begin
+        M_seg_values = 32'h150d0111;
+        M_alu_a = 16'h1555;
+        M_alu_b = 16'h0000;
+        M_alu_alufn = 6'h33;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0000;
+        end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTCMP1_state: begin
+        M_seg_values = 32'h03050b11;
+        M_alu_a = 16'h1555;
+        M_alu_b = 16'h2aab;
+        M_alu_alufn = 6'h12;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0000;
+        end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTCMP2_state: begin
+        M_seg_values = 32'h03090e11;
+        M_alu_a = 16'h2aab;
+        M_alu_b = 16'h1555;
+        M_alu_alufn = 6'h14;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0000;
+          M_alu_b = 16'h0001;
+          io_led[0+7-:8] = 8'h00;
+        end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      TESTCMP3_state: begin
+        M_seg_values = 32'h03090513;
+        M_alu_a = 16'hf0e0;
+        M_alu_b = 16'hf0e0;
+        M_alu_alufn = 6'h16;
+        if (io_dip[16+7+0-:1] == 1'h1) begin
+          M_alu_a = 16'h0001;
+          M_alu_b = 16'h0000;
+          io_led[0+7-:8] = 8'h00;
+        end
+        io_led[8+7-:8] = M_alu_out[8+7-:8];
+        io_led[0+7-:8] = M_alu_out[0+7-:8];
+      end
+      PASS_state: begin
+        M_seg_values = 32'h0c011515;
+      end
+      FAIL_state: begin
+        M_seg_values = 32'h06010809;
       end
     endcase
+    if (M_counter_q == 1'h0) begin
+      
+      case (M_state_q)
+        REST_state: begin
+          if (io_button[4+0-:1] == 1'h1) begin
+            M_state_d = AUTO_state;
+          end
+        end
+        AUTO_state: begin
+          M_state_d = TESTADDER1_state;
+        end
+        TESTADDER1_state: begin
+          if (M_alu_out == 16'h4000) begin
+            M_state_d = TESTADDER2_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        TESTADDER2_state: begin
+          if (M_alu_out == 16'hb3f4) begin
+            M_state_d = TESTADDER3_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        TESTADDER3_state: begin
+          if (M_alu_out == 16'hf0c0) begin
+            M_state_d = TESTBOOL1_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        TESTBOOL1_state: begin
+          if (M_alu_out == 16'h0001) begin
+            M_state_d = TESTBOOL2_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        TESTBOOL2_state: begin
+          if (M_alu_out == 16'h8545) begin
+            M_state_d = TESTBOOL3_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        TESTBOOL3_state: begin
+          if (M_alu_out == 16'h3fff) begin
+            M_state_d = TESTBOOL4_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        TESTBOOL4_state: begin
+          if (M_alu_out == 16'hb557) begin
+            M_state_d = TESTBOOL5_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        TESTBOOL5_state: begin
+          if (M_alu_out == 16'h3ffe) begin
+            M_state_d = TESTBOOL6_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        TESTBOOL6_state: begin
+          if (M_alu_out == 16'h3012) begin
+            M_state_d = TESTSHIFT1_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        TESTSHIFT1_state: begin
+          if (M_alu_out == 16'h5554) begin
+            M_state_d = TESTSHIFT2_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        TESTSHIFT2_state: begin
+          if (M_alu_out == 16'h1555) begin
+            M_state_d = TESTSHIFT3_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        TESTSHIFT3_state: begin
+          if (M_alu_out == 16'h1555) begin
+            M_state_d = TESTCMP1_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        TESTCMP1_state: begin
+          if (M_alu_out == 16'h0000) begin
+            M_state_d = TESTCMP2_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        TESTCMP2_state: begin
+          if (M_alu_out == 16'h0000) begin
+            M_state_d = TESTCMP3_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        TESTCMP3_state: begin
+          if (M_alu_out == 16'h0001) begin
+            M_state_d = PASS_state;
+          end else begin
+            M_state_d = FAIL_state;
+          end
+        end
+        PASS_state: begin
+          if (M_counter_q == 1'h0) begin
+            M_state_d = REST_state;
+          end
+        end
+        FAIL_state: begin
+          if (M_counter_q == 1'h0) begin
+            M_state_d = REST_state;
+          end
+        end
+      endcase
+    end
+    M_counter_d = M_counter_q + 1'h1;
   end
   
   always @(posedge clk) begin
-    M_store1_q <= M_store1_d;
-  end
-  
-  
-  always @(posedge clk) begin
-    M_store2_q <= M_store2_d;
-  end
-  
-  
-  always @(posedge clk) begin
+    M_inp_a_q <= M_inp_a_d;
+    M_inp_b_q <= M_inp_b_d;
+    M_counter_q <= M_counter_d;
     M_state_q <= M_state_d;
   end
   
