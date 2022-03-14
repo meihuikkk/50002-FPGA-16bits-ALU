@@ -1,0 +1,17 @@
+module comparator (
+   input z,
+   input v,
+   input n,
+   input alusignal[6],
+   output out[16]
+  ) {
+
+  always {
+   case(alusignal[3:1])
+    {
+    b01: out[0] = z;
+    b10: out[0] = n^v;
+    b11: out[0] = z|(n^v);
+    default: out[0] = 0;
+  }
+}

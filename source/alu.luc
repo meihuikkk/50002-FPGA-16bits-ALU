@@ -1,0 +1,54 @@
+module alu (
+    input a[16],
+    input b[16],
+    input alusignal[6],
+    output out[16],
+   output zvn[3]
+  ) {
+adder alu_add;
+shifter alu_shift;
+comparator alu_compare;
+boolean alu_boolean;
+ sig z;
+ sig v;
+ sig n;
+ always {
+   // Addition or subtraction
+   alu_add.a=a;
+   alu_add.b=b;
+   alu_add.alusignal = alusignal;
+    
+   z = alu_add.z;
+   v = alu_add.v;
+   n = alu_add.n;
+   
+   zvn[0] = z;
+   zvn[1] = v;
+   zvn[2] = n;  
+   // Shifting operation
+   alu_shift.a=a;
+    alu_shift.b = b;
+    alu_shift.alusignal=alusignal;
+   
+    // Comparision
+    alu_compare.v = v;
+    alu_compare.z = z;
+    alu_compare.n = n;
+    alu_compare.alusignal = alusignal;
+    
+    //boolean
+    alu_boolean.a=a;
+    alu_boolean.b=b;
+    alu_boolean.alusignal=alusignal;
+    
+    
+    //Display the output according to the operator chosen
+    case (alusignal[5:4])
+    {b00: out = alu_add.s;
+      b01:out = alu_compare.out;
+      b11:out = alu_shift.out;
+      b10:out = alu_boolean.out;
+      default: out =16b0;
+        
+  }
+}

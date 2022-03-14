@@ -1,0 +1,18 @@
+module boolean (
+     input a[16],
+    input b[16],
+    input alusignal[6],
+    output out[16]
+   
+) {
+
+  always {
+    case(alusignal[3:0])
+    {
+    b1000: out = a&b;
+    b1110:out = a|b;
+    b0110: out = a^b;
+    b1010:out = a;
+    default:out = 0;
+  }
+}

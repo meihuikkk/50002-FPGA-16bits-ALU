@@ -1,0 +1,24 @@
+module adder (
+   input a[16],
+   input b[16],
+    input alusignal[6],
+    output s[16],
+   output z,
+    output v,
+    output n
+    
+  )
+ {
+sig holder[16];
+  always {
+  if(alusignal[0])
+    {holder = a+b;
+    }
+  else{
+  holder = a-b;
+    }
+  s = holder;
+  z= ~|holder;
+  v= ((alusignal[0]^a[15])&(alusignal[0]^b[15])^!holder[15])|(!(alusignal[0]^a[15])&!(alusignal[0]^b[15])&(holder[15]));
+  n=holder[15];
+}
