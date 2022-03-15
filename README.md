@@ -7,7 +7,10 @@ Testing is done by either manual testing or auto testing with FSM.
 * Boolean (AND, OR, XOR)
 * Shift Left/Right (with optional sign extension)
 * Comparison (equal, less than, or both)
-
+## Additional Features
+* NOR
+* NEGATE
+* NAND
 ### Manual Testing
 To run the manual testing, power the FPGA board and wait for the seven segment display to show the word "REST". Adjust the wanted operation by changing the 6-bit ALUFN code represented by dips number 16 to 21 (0:5). 
 
