@@ -24,27 +24,23 @@ To run the automated testing you need to be at the REST state and just press the
 
 The automated testing tests each operations 2 times in this order:
 
-ADDER
 - Addition
 - Subtraction
 - Multiplication
-
-BOOLEAN
-- and
-- or
-- xor
-
-SHIFTER
+- And
+- Or
+- Xor
 - Shift Left
 - Shift Right
 - Shift Right Assigned
-
-COMPARATOR
 - Compare equal to
 - Compare less than
 - Compare less than equal
 
 This module uses a Finite State Machine (FSM) to iterate through a series of test cases for the variations operations the ALU should be capable of performing, testing some postive, negative, mixed and boundary cases.
 
+The diagram below shows how the FSM works.
+
+![img_fsm](FSM_FPGA.png)
 
 
