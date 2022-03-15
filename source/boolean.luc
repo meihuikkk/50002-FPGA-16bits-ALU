@@ -9,10 +9,14 @@ module boolean (
   always {
     case(alusignal[3:0])
     {
-    b1000: out = a&b;
-    b1110:out = a|b;
-    b0110: out = a^b;
-    b1010:out = a;
+    b1000: out = a&b; //AND
+    b1110:out = a|b;  //OR
+    b0110: out = a^b;  //XOR
+    b1010:out = a;      
+    b1011:out = ~a;    //NEGATE
+    b1001:out = ~(a|b); // NOR
+    b1111:out = ~(a&b); //NAND
+    
     default:out = 0;
   }
 }

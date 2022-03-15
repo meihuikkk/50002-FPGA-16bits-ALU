@@ -313,7 +313,7 @@ module au_top_0 (
         M_seg_values = 32'h03050b11;
         M_alu_a = 16'h1555;
         M_alu_b = 16'h2aab;
-        M_alu_alufn = 6'h12;
+        M_alu_alufn = 6'h13;
         if (io_dip[16+7+0-:1] == 1'h1) begin
           M_alu_a = 16'h0000;
           M_alu_b = 16'h0000;
@@ -325,7 +325,7 @@ module au_top_0 (
         M_seg_values = 32'h03090e11;
         M_alu_a = 16'h2aab;
         M_alu_b = 16'h1555;
-        M_alu_alufn = 6'h14;
+        M_alu_alufn = 6'h15;
         if (io_dip[16+7+0-:1] == 1'h1) begin
           M_alu_a = 16'h0000;
           M_alu_b = 16'h0001;
@@ -338,7 +338,7 @@ module au_top_0 (
         M_seg_values = 32'h03090513;
         M_alu_a = 16'hf0e0;
         M_alu_b = 16'hf0e0;
-        M_alu_alufn = 6'h16;
+        M_alu_alufn = 6'h17;
         if (io_dip[16+7+0-:1] == 1'h1) begin
           M_alu_a = 16'h0001;
           M_alu_b = 16'h0000;
