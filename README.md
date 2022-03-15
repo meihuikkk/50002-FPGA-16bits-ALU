@@ -3,7 +3,7 @@ Implement 16-bit ALU design on an FPGA and test the functionality of the 16-bit 
 Testing is done by either manual testing or auto testing with FSM.
 
 ### Core ALU Functionality
-* Addtion/Subtraction/Multiplication/Inverter
+* Addtion/Subtraction/Inverter
 * Boolean (AND, OR, XOR)
 * Shift Left/Right (with optional sign extension)
 * Comparison (equal, less than, or both)
@@ -26,7 +26,6 @@ The automated testing tests each operations 2 times in this order:
 
 - Addition
 - Subtraction
-- Multiplication
 - And
 - Or
 - Xor
