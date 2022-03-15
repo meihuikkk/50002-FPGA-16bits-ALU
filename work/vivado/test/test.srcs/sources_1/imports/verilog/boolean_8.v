@@ -28,6 +28,15 @@ module boolean_8 (
       4'ha: begin
         out = a;
       end
+      4'hb: begin
+        out = ~a;
+      end
+      4'h9: begin
+        out = ~(a | b);
+      end
+      4'hf: begin
+        out = ~(a & b);
+      end
       default: begin
         out = 1'h0;
       end

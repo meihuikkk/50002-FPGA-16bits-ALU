@@ -295,7 +295,7 @@ module au_top (
         seg.values = {8h3,8h5,8hB,8h11};  //EQUAL
         alu.a = 16b0001010101010101;
         alu.b = 16b0010101010101011;
-        alu.alufn = 6b010010;       
+        alu.alufn = 6b010011;       
         if (io_dip[2][7] == 1){
           alu.a = 16b0;
           alu.b = 16b0;          
@@ -308,7 +308,7 @@ module au_top (
         seg.values = {8h3,8h9,8hE,8h11};  //CLT1
         alu.a = 16b0010101010101011;
         alu.b = 16b0001010101010101;
-        alu.alufn = 6b010100;    
+        alu.alufn = 6b010101;    
         if (io_dip[2][7] == 1){
           alu.a = 16b0;
           alu.b = 16b1;  
@@ -322,7 +322,7 @@ module au_top (
         seg.values = {8h3,8h9,8h5,8h13};  //LESSER EQUAL TO
         alu.a = 16b1111000011100000;
         alu.b = 16b1111000011100000;
-        alu.alufn = 6b010110;    
+        alu.alufn = 6b010111;    
         if (io_dip[2][7] == 1){
           alu.a = 16b1;
           alu.b = 16b0;    

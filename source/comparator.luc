@@ -14,4 +14,3 @@ module comparator (
     b11: out[0] = z|(n^v);
     default: out[0] = 0;
   }
-}
